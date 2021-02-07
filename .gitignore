@@ -1,0 +1,4 @@
+__pycache__/
+migrations
+images
+mini_chat/connection.py

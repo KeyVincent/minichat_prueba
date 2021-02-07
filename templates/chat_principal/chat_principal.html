@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="messaging" ng-controller="chat_controller">
+        <div class="inbox_msg">
+            <div class="inbox_people">
+                <div class="headind_srch">
+                    <div class="recent_heading">
+                        <h4>{% trans 'Usuarios' %}</h4>
+                    </div>
+                    <div class="srch_bar">
+                        <div class="stylish-input-group">
+                            <p class="text-center top_spac"><small>{{ user }} | <a
+                                        href="/login">{% trans 'Cerrar sesion' %}</a></small></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="inbox_chat scroll">
+                    <div class="chat_list">
+                        <div class="chat_people" ng-init="load_data('/api/1/auth_user/', 'users_list')">
+                            <span ng-repeat="user in users_list">
+                                <div class="chat_img"><img src="{% static 'img/user_male.png' %}" alt="sunil">
+                                </div>
+                                <div class="chat_ib">
+                                    <h5>{$ user.first_name $} {$ user.last_name $}</h5>
+                                    <p>{$ user.last_login|date:'short' $}</p>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mesgs" ng-init="load_data('/api/1/messages/', 'messages')">
+                <div class="msg_history" ng-init="user_id={{ user.id }}">
+                    <span ng-repeat="message in messages | orderBy:message.fecha">
+                        <div class="incoming_msg" ng-if="message.usuario!=user_id">
+                            <div class="incoming_msg_img"><img src="{% static 'img/user_male.png' %}" alt="sunil"></div>
+                            <div class="received_msg">
+                                <div class="received_withd_msg">
+                                    <p><b>{$ message.usuario_first_name $} {$ message.usuario_last_name $}: </b>{$
+                                        message.mensaje $}<br>
+                                        <a href="{$ message.imagen_archivo $}" ng-if="message.imagen_archivo" target="_blank">
+                                        <img src="{$ message.imagen_archivo $}" width="50" height="50">
+                                        <i class="fa fa-file-image-o" aria-hidden="true"></i></a>
+                                    </p>
+
+                                    <span class="time_date">{$ message.fecha|date:'short' $}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="outgoing_msg" ng-if="message.usuario==user_id">
+                            <div class="sent_msg_img"><img src="{% static 'img/user_male.png' %}" alt="sunil"></div>
+                            <div class="sent_msg">
+                                <p>
+                                    <i class="fa fa-times" aria-hidden="true"
+                                        ng-click="delete_message(message.id)"></i><br>
+                                    <b>{$ message.usuario_first_name $} {$ message.usuario_last_name $}:</b> {$
+                                    message.mensaje $}<br>
+                                        <a href="{$ message.imagen_archivo $}" ng-if="message.imagen_archivo" target="_blank">
+                                        <img src="{$ message.imagen_archivo $}" width="50" height="50">
+                                        <i class="fa fa-file-image-o" aria-hidden="true"></i></a>
+                                </p>
+                                <span class="time_date">{$ message.fecha|date:'short' $}</span>
+                            </div>
+                        </div>
+                    </span>
+                    <i class="fa fa-spinner fa-spin fa-3x fa-fw text-center" ng-if="loading_messages"></i>
+                </div>
+                <div class="type_msg">
+                    <div class="input_msg_write">
+                        <form enctype="multipart/form-data" name="messageForm" id="messageForm" method="post">
+                            {% csrf_token %}
+                            {{ form.mensaje }}
+                            {{ form.imagen }}
+                        </form>
+                        <button class="msg_send_btn" type="button" ng-click="submitForm()"><i
+                                class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
